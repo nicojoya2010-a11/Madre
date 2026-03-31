@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Ventas</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:       #C9A84C;
+    --gold-light: #E8C97A;
+    --dark1:      #0A0C14;
+    --dark2:      #111420;
+    --dark3:      #1A1E2E;
+    --dark4:      #242840;
+    --glass:      rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.10);
+    --text:       #F0EDE6;
+    --text-muted: rgba(240,237,230,0.45);
+    --success:    #4CAF82;
+    --error:      #E05A5A;
+  }
+ 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--dark1);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(60, 30, 120, 0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%,  rgba(20, 60, 120, 0.50) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%,   rgba(201,168,76,0.07)   0%, transparent 70%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+ 
+  /* ── HEADER ── */
+  .page-header {
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+ 
+  .eyebrow {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+ 
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+ 
+  .page-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+    letter-spacing: 0.2px;
+  }
+ 
+  /* ── CARD ── */
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+ 
+  /* línea dorada superior */
+  .card::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, var(--gold-light) 60%, transparent 100%);
+  }
+ 
+  /* ── FORM BODY ── */
+  .form-body {
+    padding: 36px 40px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+ 
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+ 
+  label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+ 
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+ 
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+ 
+  input:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.07);
+  }
+ 
+  input::placeholder { color: rgba(240,237,230,0.22); }
+ 
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 0;
+  }
+ 
+  /* ── ACTIONS ── */
+  .form-actions {
+    padding: 24px 40px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+ 
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #C9A84C 0%, #E8C97A 50%, #C9A84C 100%);
+    background-size: 200% auto;
+    color: #0A0C14;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-position 0.4s, transform 0.1s, opacity 0.2s;
+  }
+ 
+  .btn-submit:hover { background-position: right center; }
+  .btn-submit:active { transform: scale(0.99); }
+ 
+  .btn-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+ 
+  .btn-submit .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(10,12,20,0.3);
+    border-top-color: #0A0C14;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  .btn-submit.loading .btn-label { display: none; }
+  .btn-submit.loading .spinner  { display: block; }
+ 
+  @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  /* ── STATUS ── */
+  .status-bar {
+    display: none;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-size: 0.81rem;
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.25s ease;
+  }
+ 
+  .status-bar.success {
+    display: block;
+    background: rgba(76,175,130,0.12);
+    border: 1px solid rgba(76,175,130,0.30);
+    color: #6EDBA8;
+  }
+ 
+  .status-bar.error {
+    display: block;
+    background: rgba(224,90,90,0.10);
+    border: 1px solid rgba(224,90,90,0.28);
+    color: #F08080;
+  }
+ 
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+ 
+  /* ── HISTORIAL ── */
+  .history-section {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 28px;
+  }
+ 
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    padding: 0 2px;
+  }
+ 
+  .history-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.2px;
+  }
+ 
+  .history-count {
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+ 
+  .history-table-wrap {
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--glass);
+    position: relative;
+  }
+ 
+  .history-table-wrap::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, var(--gold-light) 60%, transparent 100%);
+  }
+ 
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+ 
+  thead tr { background: rgba(201,168,76,0.08); }
+ 
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 0.60rem;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+ 
+  tbody tr {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.12s;
+  }
+ 
+  tbody tr:hover { background: rgba(255,255,255,0.04); }
+ 
+  tbody td {
+    padding: 11px 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+ 
+  tbody td.num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: rgba(240,237,230,0.80);
+  }
+ 
+  .tag-producto {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(201,168,76,0.12);
+    color: var(--gold-light);
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    border: 1px solid rgba(201,168,76,0.20);
+  }
+ 
+  .no-rows td {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 28px;
+    font-style: italic;
+    font-size: 0.81rem;
+  }
+ 
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .form-body, .form-actions { padding-left: 24px; padding-right: 24px; }
+    .page-title { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+ 
+<header class="page-header">
+  <span class="eyebrow">Panel de ventas</span>
+  <h1 class="page-title">Registro de Ventas</h1>
+  <p class="page-subtitle">Completa el formulario y el registro se guardará automáticamente en Google Sheets.</p>
+</header>
+ 
+<div class="card">
+  <div class="form-body">
+ 
+    <div class="field">
+      <label for="producto">Producto vendido</label>
+      <input type="text" id="producto" placeholder="Ej. Camiseta talla M" autocomplete="off">
+    </div>
+ 
+    <div class="field">
+      <label for="cantidad">Cantidad</label>
+      <input type="number" id="cantidad" placeholder="0" min="1">
+    </div>
+ 
+    <div class="field">
+      <label for="valor">Valor unitario ($)</label>
+      <input type="number" id="valor" placeholder="0.00" min="0" step="0.01">
+    </div>
+ 
+  </div>
+ 
+  <div class="divider"></div>
+ 
+  <div class="form-actions">
+    <button class="btn-submit" id="btnGuardar" onclick="guardarVenta()">
+      <span class="btn-label">Guardar venta</span>
+      <span class="spinner"></span>
+    </button>
+    <div class="status-bar" id="statusBar"></div>
+  </div>
+</div>
+ 
+<!-- Historial local de la sesión -->
+<div class="history-section">
+  <div class="history-header">
+    <span class="history-title">Registros de esta sesión</span>
+    <span class="history-count" id="historyCount">0 ventas</span>
+  </div>
+  <div class="history-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Producto</th>
+          <th style="text-align:right">Cant.</th>
+          <th style="text-align:right">V. Unit.</th>
+          <th style="text-align:right">Total</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr class="no-rows">
+          <td colspan="5">Aún no hay ventas registradas en esta sesión.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+<script>
+  // ╔══════════════════════════════════════════════════════╗
+  // ║  IMPORTANTE: pegá aquí la URL de tu Web App de       ║
+  // ║  Google Apps Script después de desplegarla.          ║
+  // ║  Ejecutar como: Yo | Acceso: Cualquiera              ║
+  // ╚══════════════════════════════════════════════════════╝
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1RyaKuA3j7GaS-3R4duEzVebFWvHDBKdGo2P35qovmTDUxhOSPNkQJ89nFHyjPizt/exec';
+ 
+  const ventas = [];
+ 
+  function fmt(n) {
+    return '$' + Number(n).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+ 
+  function mostrarStatus(msg, tipo) {
+    const el = document.getElementById('statusBar');
+    el.textContent = msg;
+    el.className = 'status-bar ' + tipo;
+  }
+ 
+  function limpiarStatus() {
+    const el = document.getElementById('statusBar');
+    el.className = 'status-bar';
+    el.textContent = '';
+  }
+ 
+  function agregarFilaHistorial(venta) {
+    const tbody = document.getElementById('historyBody');
+ 
+    // Quita la fila vacía si existe
+    const noRows = tbody.querySelector('.no-rows');
+    if (noRows) noRows.remove();
+ 
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${venta.hora}</td>
+      <td><span class="tag-producto">${venta.producto}</span></td>
+      <td class="num">${venta.cantidad}</td>
+      <td class="num">${fmt(venta.valor)}</td>
+      <td class="num"><strong>${fmt(venta.total)}</strong></td>
+    `;
+    tbody.prepend(tr);
+ 
+    document.getElementById('historyCount').textContent =
+      ventas.length + (ventas.length === 1 ? ' venta' : ' ventas');
+  }
+ 
+  async function guardarVenta() {
+    limpiarStatus();
+ 
+    const producto  = document.getElementById('producto').value.trim();
+    const cantidad  = parseFloat(document.getElementById('cantidad').value);
+    const valor     = parseFloat(document.getElementById('valor').value);
+ 
+    // Validación básica
+    if (!producto) { mostrarStatus('Por favor ingresá el nombre del producto.', 'error'); return; }
+    if (!cantidad || cantidad <= 0) { mostrarStatus('La cantidad debe ser mayor a 0.', 'error'); return; }
+    if (!valor || valor < 0)  { mostrarStatus('El valor debe ser 0 o mayor.', 'error'); return; }
+ 
+    const total = cantidad * valor;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleString('es-CO');
+    const hora  = ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+ 
+    const datos = { fecha, producto, cantidad, valor, total };
+ 
+    // UI: loading
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.classList.add('loading');
+ 
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        // Apps Script con doPost necesita text/plain para evitar preflight CORS
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(datos)
+      });
+ 
+      const json = await resp.json();
+ 
+      if (json.ok) {
+        mostrarStatus(`✓ Venta guardada correctamente en la fila ${json.fila}.`, 'success');
+        ventas.push({ ...datos, hora });
+        agregarFilaHistorial({ ...datos, hora });
+        // Limpiar campos
+        document.getElementById('producto').value  = '';
+        document.getElementById('cantidad').value  = '';
+        document.getElementById('valor').value     = '';
+      } else {
+        mostrarStatus('No se pudo guardar: ' + (json.error || 'error desconocido'), 'error');
+      }
+    } catch (e) {
+      mostrarStatus('Error de conexión. Verificá la URL del Web App.', 'error');
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+ 
+  // También guardar con Enter
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
+      guardarVenta();
+    }
+  });
+</script>
+ 
+</body>
+</html>
